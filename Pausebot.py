@@ -1,7 +1,19 @@
 from enum import IntEnum, unique
+from flask import Flask
 from slack import WebClient
 from slack.errors import SlackApiError
 
+
+class Pausebot():
+    """
+    The bot! Should store:
+    Pause queue [list of User]
+    Current user taking a pause (Maybe just the top element of the pause queue?) [User]
+    Methods for input from Slack as outlined below
+    Methods for responding to Slack
+    Methods for managing the pause queue
+    """
+    pass
 
 @unique
 class Pause(IntEnum):
@@ -14,7 +26,7 @@ class Pause(IntEnum):
 
 class User():
     """
-    Abstract class for storing users, should contain the following:
+    Class for storing users, should contain the following:
     User's display name [String]
     Type of pause the user is taking [Pause]
     When the user's pause is over [datetime object?]
@@ -36,20 +48,20 @@ def acknowledge_pause(user, pause):
     """
     pass
 
-def add_to_list(user, pause, pauselist):
+def add_to_queue(user, pause, pauselist):
     """
-    Update the list of users who are currently taking a pause
+    Update the queue of users who are waitinbg for their pause
     """
     pass
 
-def remove_from_list(user, pauselist):
+def remove_from_queue(user, pauselist):
     """
     Remove a user from the list once their pause has ended
     """
     pass
 
-def respond_pauselist(pauselist):
+def respond_pausequeue(pauselist):
     """
-    Respond to the /list command with the list of users currently taking a pause and the end time of their respective pausees
+    Respond to the queue command with the list of users waiting for their pause
     """
     pass
