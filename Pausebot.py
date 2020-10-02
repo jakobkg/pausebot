@@ -98,7 +98,7 @@ flaskapp = Flask(__name__)
 
 @flaskapp.route('/', method=['POST'])
 def pass_to_bot():
-    bot.parse_command(request.json)
+    return jsonify(bot.parse_command(request.json))
 
 
 if __name__ == '__main__':
