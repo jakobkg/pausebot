@@ -48,7 +48,7 @@ class Pausebot():
         """
         Parse the Slack JSON message of a triggered /slash command, and call the appropriate handling method
         """
-        return '{"ok": True}'
+        return {"ok": True}
 
 
 def acknowledge_pause(user, pause):
