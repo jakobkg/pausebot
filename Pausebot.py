@@ -1,19 +1,8 @@
 from enum import IntEnum, unique
-from flask import Flask
+from datetime import datetime, time
+from flask import Flask, jsonify, request
 from slack import WebClient
 from slack.errors import SlackApiError
-
-
-class Pausebot():
-    """
-    The bot! Should store:
-    Pause queue [list of User]
-    Current user taking a pause (Maybe just the top element of the pause queue?) [User]
-    Methods for input from Slack as outlined below
-    Methods for responding to Slack
-    Methods for managing the pause queue
-    """
-    pass
 
 @unique
 class Pause(IntEnum):
@@ -31,16 +20,35 @@ class User():
     Type of pause the user is taking [Pause]
     When the user's pause is over [datetime object?]
     """
-    pass
+    
+    m_DisplayName : str
+    m_PauseType : Pause
+    m_PauseEnd : datetime.datetime
+    
+
+class Pausebot():
+    """
+    The bot! Should store:
+    Pause queue [list of User]
+    Methods for input from Slack as outlined below
+    Methods for responding to Slack
+    Methods for managing the pause queue
+    """
+
+    m_PauseQueue : User
+    m_client : WebClient
+
+    def __init__(self, client : WebClient) -> None:
+        self.m_client = client
+        self.m_PauseQueue = []
 
 
-def parse_incoming(message):
-    """
-    Parse incoming message from Slack
-    Expected input is the json from the slash command in Slack
-    Output is the display name of the user triggering the command and the type of pause the user is taking (15 minute break or 30 minute lunch)
-    """
-    pass
+    def parse_command(self, command_json):
+        """
+        Parse the Slack JSON message of a triggered /slash command, and call the appropriate handling method
+        """
+        pass
+
 
 def acknowledge_pause(user, pause):
     """
@@ -65,3 +73,33 @@ def respond_pausequeue(pauselist):
     Respond to the queue command with the list of users waiting for their pause
     """
     pass
+
+
+SLACK_BOT_KEY : str
+SLACK_AUTH_KEY : str
+
+try:
+    with open('slack_bot_key') as f:
+        SLACK_BOT_KEY = f.readline()
+except FileNotFoundError:
+    print('Bot key file not found!')
+    quit()
+
+try:
+    with open('slack_auth_key') as f:
+        SLACK_AUTH_KEY = f.readline()
+except FileNotFoundError:
+    print('Auth key file not found!')
+    quit()
+
+bot = Pausebot(WebClient(token=SLACK_BOT_KEY))
+
+flaskapp = Flask(__name__)
+
+@flaskapp.route('/', method=['POST'])
+def pass_to_bot():
+    bot.parse_command(request.json)
+
+
+if __name__ == '__main__':
+    flaskapp.run()
