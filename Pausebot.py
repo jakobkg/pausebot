@@ -23,7 +23,7 @@ class User():
     
     m_DisplayName : str
     m_PauseType : Pause
-    m_PauseEnd : datetime.datetime
+    m_PauseEnd : datetime
     
 
 class Pausebot():
@@ -47,7 +47,7 @@ class Pausebot():
         """
         Parse the Slack JSON message of a triggered /slash command, and call the appropriate handling method
         """
-        pass
+        return '{"ok": True}'
 
 
 def acknowledge_pause(user, pause):
@@ -96,7 +96,7 @@ bot = Pausebot(WebClient(token=SLACK_BOT_KEY))
 
 flaskapp = Flask(__name__)
 
-@flaskapp.route('/', method=['POST'])
+@flaskapp.route('/', methods=['POST'])
 def pass_to_bot():
     return jsonify(bot.parse_command(request.json))
 
