@@ -76,8 +76,8 @@ def respond_pausequeue(pauselist):
     pass
 
 
-SLACK_BOT_KEY = os.env['BOTKEY']
-SLACK_AUTH_KEY = os.env['AUTHKEY']
+SLACK_BOT_KEY = os.environ['BOTKEY']
+SLACK_AUTH_KEY = os.environ['AUTHKEY']
 
 bot = Pausebot(WebClient(token=SLACK_BOT_KEY))
 
