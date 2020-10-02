@@ -1,3 +1,4 @@
+import os
 from enum import IntEnum, unique
 from datetime import datetime, time
 from flask import Flask, jsonify, request
@@ -75,22 +76,8 @@ def respond_pausequeue(pauselist):
     pass
 
 
-SLACK_BOT_KEY : str
-SLACK_AUTH_KEY : str
-
-try:
-    with open('slack_bot_key') as f:
-        SLACK_BOT_KEY = f.readline()
-except FileNotFoundError:
-    print('Bot key file not found!')
-    quit()
-
-try:
-    with open('slack_auth_key') as f:
-        SLACK_AUTH_KEY = f.readline()
-except FileNotFoundError:
-    print('Auth key file not found!')
-    quit()
+SLACK_BOT_KEY = os.env['BOTKEY']
+SLACK_AUTH_KEY = os.env['AUTHKEY']
 
 bot = Pausebot(WebClient(token=SLACK_BOT_KEY))
 
