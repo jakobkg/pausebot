@@ -31,6 +31,7 @@ class Pausebot():
     """
     The bot! Should store:
     Pause queue [list of User]
+    The Slack client? [WebClient]
     Methods for input from Slack as outlined below
     Methods for responding to Slack
     Methods for managing the pause queue
@@ -48,7 +49,7 @@ class Pausebot():
         """
         Parse the Slack JSON message of a triggered /slash command, and call the appropriate handling method
         """
-        return {"ok": True}
+        return (True, 'dette er en tekst-respons')
 
 
 def acknowledge_pause(user, pause):
@@ -76,8 +77,27 @@ def respond_pausequeue(pauselist):
     pass
 
 
-SLACK_BOT_KEY = os.environ['BOTKEY']
-SLACK_AUTH_KEY = os.environ['AUTHKEY']
+SLACK_BOT_KEY = None
+SLACK_AUTH_KEY = None
+DEBUG_FLAG = None
+
+try:
+    SLACK_BOT_KEY = os.environ['BOTKEY']
+except KeyError:
+    print('WARNING: Bot API key not found')
+    SLACK_BOT_KEY = ""
+
+try:
+    SLACK_AUTH_KEY = os.environ['AUTHKEY']
+except KeyError:
+    print('WARNING: Slack AUTH key not found')
+    SLACK_AUTH_KEY = ""
+
+try:
+    DEBUG_FLAG = os.environ['PAUSEBOT_DEBUG']
+except KeyError:
+    pass
+
 
 bot = Pausebot(WebClient(token=SLACK_BOT_KEY))
 
@@ -85,7 +105,11 @@ flaskapp = Flask(__name__)
 
 @flaskapp.route('/', methods=['POST'])
 def pass_to_bot():
-    return jsonify(bot.parse_command(request.json))
+    if DEBUG_FLAG:
+        print(request.json)
+
+    botresponse = bot.parse_command(request.json)
+    return jsonify(ok=botresponse[0], text=botresponse[1])
 
 
 if __name__ == '__main__':
