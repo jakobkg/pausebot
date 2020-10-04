@@ -50,6 +50,7 @@ class Pausebot():
         Parse the Slack JSON message of a triggered /slash command,
         and call the appropriate handling method
         """
+        print(command_json)
         return (True, 'dette er en tekst-respons')
 
 
