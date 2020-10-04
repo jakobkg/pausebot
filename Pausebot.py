@@ -111,9 +111,9 @@ flaskapp = Flask(__name__)
 @flaskapp.route('/', methods=['POST'])
 def pass_to_bot():
     if DEBUG_FLAG:
-        print(request)
+        print(request.get_data())
 
-    botresponse = bot.parse_command(request)
+    botresponse = bot.parse_command(request.data)
     return jsonify(ok=botresponse[0], text=botresponse[1])
 
 
