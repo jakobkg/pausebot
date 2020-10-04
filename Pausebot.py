@@ -5,6 +5,7 @@ from flask import Flask, jsonify, request
 from slack import WebClient
 from slack.errors import SlackApiError
 
+
 @unique
 class Pause(IntEnum):
     """
@@ -21,11 +22,11 @@ class User():
     Type of pause the user is taking [Pause]
     When the user's pause is over [datetime object?]
     """
-    
-    m_DisplayName : str
-    m_PauseType : Pause
-    m_PauseEnd : datetime
-    
+
+    m_DisplayName: str
+    m_PauseType: Pause
+    m_PauseEnd: datetime
+
 
 class Pausebot():
     """
@@ -37,17 +38,17 @@ class Pausebot():
     Methods for managing the pause queue
     """
 
-    m_PauseQueue : User
-    m_client : WebClient
+    m_PauseQueue: User
+    m_client: WebClient
 
-    def __init__(self, client : WebClient) -> None:
+    def __init__(self, client: WebClient) -> None:
         self.m_client = client
         self.m_PauseQueue = []
 
-
     def parse_command(self, command_json):
         """
-        Parse the Slack JSON message of a triggered /slash command, and call the appropriate handling method
+        Parse the Slack JSON message of a triggered /slash command,
+        and call the appropriate handling method
         """
         return (True, 'dette er en tekst-respons')
 
@@ -58,17 +59,20 @@ def acknowledge_pause(user, pause):
     """
     pass
 
+
 def add_to_queue(user, pause, pauselist):
     """
     Update the queue of users who are waitinbg for their pause
     """
     pass
 
+
 def remove_from_queue(user, pauselist):
     """
     Remove a user from the list once their pause has ended
     """
     pass
+
 
 def respond_pausequeue(pauselist):
     """
@@ -102,6 +106,7 @@ except KeyError:
 bot = Pausebot(WebClient(token=SLACK_BOT_KEY))
 
 flaskapp = Flask(__name__)
+
 
 @flaskapp.route('/', methods=['POST'])
 def pass_to_bot():
