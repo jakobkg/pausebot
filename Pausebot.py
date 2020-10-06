@@ -45,9 +45,9 @@ class Pausebot():
         self.m_client = client
         self.m_PauseQueue = []
 
-    def parse_command(self, command_json):
+    def parse_command(self, request_data):
         """
-        Parse the Slack JSON message of a triggered /slash command,
+        Parse the Slack POST message of a triggered /slash command,
         and call the appropriate handling method
         """
         return (True, 'dette er en tekst-respons')
@@ -111,9 +111,9 @@ flaskapp = Flask(__name__)
 @flaskapp.route('/', methods=['POST'])
 def pass_to_bot():
     if DEBUG_FLAG:
-        print(request.get_data())
+        print(request.args)
 
-    botresponse = bot.parse_command(request.data)
+    botresponse = bot.parse_command(request.args)
     return jsonify(ok=botresponse[0], text=botresponse[1])
 
 
