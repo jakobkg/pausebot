@@ -50,7 +50,7 @@ class Pausebot():
         Parse the Slack POST message of a triggered /slash command,
         and call the appropriate handling method
         """
-        valid_channels = ['b2c_pt_pause']
+        valid_channels = ['b2c_pt_pause', 'directmessage'] if DEBUG_FLAG else ['b2c_pt_pause']
 
         if request_dict['channel_name'] not in valid_channels:
             return (True, 'Feil kanal! Jeg svarer bare i #b2c_pt_pause')
