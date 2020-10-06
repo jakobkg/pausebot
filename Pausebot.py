@@ -45,12 +45,17 @@ class Pausebot():
         self.m_client = client
         self.m_PauseQueue = []
 
-    def parse_command(self, request_data):
+    def parse_command(self, request_dict):
         """
         Parse the Slack POST message of a triggered /slash command,
         and call the appropriate handling method
         """
-        return (True, 'dette er en tekst-respons')
+        valid_channels = ['b2c_pt_pause']
+
+        if request_dict['channel_name'] not in valid_channels:
+            return (True, 'Feil kanal! Jeg svarer bare i #b2c_pt_pause')
+        else:
+            return (True, 'Hurra, dette er en gyldig kanal')
 
 
 def acknowledge_pause(user, pause):
@@ -110,14 +115,14 @@ flaskapp = Flask(__name__)
 
 @flaskapp.route('/', methods=['POST'])
 def pass_to_bot():
-    data = request.form
+    slashcommand_dict = request.form
     if DEBUG_FLAG:
         print('==== SLACK POST REQUEST RECEIVED ===')
         print('Contents:')
-        for item in data.items():
+        for item in slashcommand_dict.items():
             print(item)
 
-    botresponse = bot.parse_command(request.args)
+    botresponse = bot.parse_command(slashcommand_dict)
     return jsonify(ok=botresponse[0], text=botresponse[1])
 
 
