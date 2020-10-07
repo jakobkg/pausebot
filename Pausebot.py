@@ -1,4 +1,5 @@
 import os
+import pytz
 from enum import IntEnum, unique
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
@@ -29,13 +30,11 @@ class User():
     m_PauseType: Pause
     m_PauseEnd: datetime
 
-
     def __init__(self, id: str, pause: Pause, pauseEnd: datetime) -> None:
         self.m_UserID = id
         self.m_PauseType = pause
         self.m_PauseEnd = pauseEnd
 
-    
     def getPauseEnd(self):
         """
         Returns the datetime object of the end of the user's pause [datetime object]
@@ -43,13 +42,13 @@ class User():
 
         return self.m_PauseEnd
 
-    
     def getPauseType(self):
         """
         Returns the type of pause the user is taking [Pause]
         """
-        
+
         return self.m_PauseType
+
 
 class Pausebot():
     """
@@ -68,7 +67,6 @@ class Pausebot():
         self.m_client = client
         self.m_PauseQueue = []
 
-
     def parse_command(self, requestDict: dict) -> str:
         """
         Parse the Slack POST message of a triggered /slash command,
@@ -79,10 +77,10 @@ class Pausebot():
 
         if requestDict['channel_name'] not in validChannels:
             return 'Feil kanal! Jeg svarer bare i #b2c_pt_pause'
-        
+
         pause = Pause.Lunch if requestDict['command'] == '/lunsj' else Pause.Break
-        pauseEnd = datetime.now() + timedelta(minutes=pause, hours=2)
-        
+        pauseEnd = datetime.now(pytz.timezone('Europe/Oslo')) + timedelta(minutes=pause)
+
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
         self.m_PauseQueue.append(initiator)
@@ -93,7 +91,7 @@ class Pausebot():
         """
         Send a response to let the user know that their pause has been registered
         """
-        
+
         return 'Ok, du har pause til ' + user.getPauseEnd().strftime('%H:%M')
 
 
