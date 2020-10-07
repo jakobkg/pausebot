@@ -80,9 +80,9 @@ class Pausebot():
 
         self.m_PauseQueue.append(initiator)
 
-        return self.acknowledge_pause(self, initiator)
+        return self.__acknowledge_pause(initiator)
 
-    def acknowledge_pause(self, user: User) -> str:
+    def __acknowledge_pause(self, user: User) -> str:
         """
         Send a response to let the user know that their pause has been registered
         """
