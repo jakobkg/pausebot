@@ -38,11 +38,18 @@ class User():
     
     def getPauseEnd(self):
         """
-        Return the datetime object of the end of the user's pause [datetime object]
+        Returns the datetime object of the end of the user's pause [datetime object]
         """
 
         return self.m_PauseEnd
 
+    
+    def getPauseType(self):
+        """
+        Returns the type of pause the user is taking [Pause]
+        """
+        
+        return self.m_PauseType
 
 class Pausebot():
     """
@@ -87,7 +94,7 @@ class Pausebot():
         Send a response to let the user know that their pause has been registered
         """
         
-        return 'Ok, du har pause til' + user.getPauseEnd().strftime('%H:%M')
+        return 'Ok, du har pause til ' + user.getPauseEnd().strftime('%H:%M')
 
 
 def respond_pausequeue(pauselist):
