@@ -81,7 +81,7 @@ class Pausebot():
             return 'Feil kanal! Jeg svarer bare i #b2c_pt_pause'
         
         pause = Pause.Lunch if requestDict['command'] == '/lunsj' else Pause.Break
-        pauseEnd = datetime.now() + timedelta(minutes=pause)
+        pauseEnd = datetime.now() + timedelta(minutes=pause, hours=2)
         
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
