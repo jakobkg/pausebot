@@ -1,6 +1,6 @@
 import os
 from enum import IntEnum, unique
-from datetime import datetime, time
+from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
 from slack import WebClient
 from slack.errors import SlackApiError
@@ -19,13 +19,29 @@ class User():
     """
     Class for storing users, should contain the following:
     User's display name [String]
+    User's Slack ID [String]
     Type of pause the user is taking [Pause]
     When the user's pause is over [datetime object?]
     """
 
     m_DisplayName: str
+    m_UserID: str
     m_PauseType: Pause
     m_PauseEnd: datetime
+
+
+    def __init__(self, id: str, pause: Pause, pauseEnd: datetime) -> None:
+        self.m_UserID = id
+        self.m_PauseType = pause
+        self.m_PauseEnd = pauseEnd
+
+    
+    def getPauseEnd(self):
+        """
+        Return the datetime object of the end of the user's pause [datetime object]
+        """
+
+        return self.m_PauseEnd
 
 
 class Pausebot():
@@ -33,7 +49,7 @@ class Pausebot():
     The bot! Should store:
     Pause queue [list of User]
     The Slack client? [WebClient]
-    Methods for input from Slack as outlined below
+    Methods for parsing and processing input from Slack
     Methods for responding to Slack
     Methods for managing the pause queue
     """
@@ -45,38 +61,33 @@ class Pausebot():
         self.m_client = client
         self.m_PauseQueue = []
 
-    def parse_command(self, request_dict):
+
+    def parse_command(self, requestDict: dict) -> str:
         """
         Parse the Slack POST message of a triggered /slash command,
         and call the appropriate handling method
         """
-        valid_channels = ['b2c_pt_pause', 'directmessage'] if DEBUG_FLAG else ['b2c_pt_pause']
 
-        if request_dict['channel_name'] not in valid_channels:
-            return (True, 'Feil kanal! Jeg svarer bare i #b2c_pt_pause')
-        else:
-            return (True, 'Hurra, dette er en gyldig kanal')
+        validChannels = ['b2c_pt_pause', 'directmessage'] if DEBUG_FLAG else ['b2c_pt_pause']
 
+        if requestDict['channel_name'] not in validChannels:
+            return 'Feil kanal! Jeg svarer bare i #b2c_pt_pause'
+        
+        pause = Pause.Lunch if requestDict['command'] == '/lunsj' else Pause.Break
+        pauseEnd = datetime.now() + timedelta(minutes=pause)
+        
+        initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
-def acknowledge_pause(user, pause):
-    """
-    Send a response to let the user know that their pause has been registered
-    """
-    pass
+        self.m_PauseQueue.append(initiator)
 
+        return self.acknowledge_pause(self, initiator)
 
-def add_to_queue(user, pause, pauselist):
-    """
-    Update the queue of users who are waitinbg for their pause
-    """
-    pass
-
-
-def remove_from_queue(user, pauselist):
-    """
-    Remove a user from the list once their pause has ended
-    """
-    pass
+    def acknowledge_pause(self, user: User) -> str:
+        """
+        Send a response to let the user know that their pause has been registered
+        """
+        
+        return 'Ok, du har pause til' + user.getPauseEnd().strftime('%H:%M')
 
 
 def respond_pausequeue(pauselist):
@@ -110,21 +121,21 @@ except KeyError:
 
 bot = Pausebot(WebClient(token=SLACK_BOT_KEY))
 
-flaskapp = Flask(__name__)
+flaskApp = Flask(__name__)
 
 
-@flaskapp.route('/', methods=['POST'])
+@flaskApp.route('/', methods=['POST'])
 def pass_to_bot():
-    slashcommand_dict = request.form
+    slashcommandDict = request.form
     if DEBUG_FLAG:
         print('==== SLACK POST REQUEST RECEIVED ===')
         print('Contents:')
-        for item in slashcommand_dict.items():
+        for item in slashcommandDict.items():
             print(item)
 
-    botresponse = bot.parse_command(slashcommand_dict)
-    return jsonify(ok=botresponse[0], text=botresponse[1])
+    botResponse = bot.parse_command(slashcommandDict)
+    return jsonify(ok=True, text=botResponse)
 
 
 if __name__ == '__main__':
-    flaskapp.run()
+    flaskApp.run()
