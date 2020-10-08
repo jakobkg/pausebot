@@ -1,5 +1,6 @@
 import os
 import pytz
+import requests
 from enum import IntEnum, unique
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
@@ -22,7 +23,7 @@ class User():
     User's display name [String]
     User's Slack ID [String]
     Type of pause the user is taking [Pause]
-    When the user's pause is over [datetime object?]
+    When the user's pause is over [datetime object]
     """
 
     m_DisplayName: str
@@ -94,9 +95,8 @@ class Pausebot():
 
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
-        self.m_client.chat_postMessage(channel=requestDict['channel_id'], text=self.__acknowledge_public(initiator))
-
-        return self.__acknowledge_private(initiator)
+        requests.post(url=requestDict['response_url'], json=jsonify({'text': self.__acknowledge_private(initiator), 'response_type': 'ephemeral'}))
+        requests.post(url=requestDict['response_url'], json=jsonify({'text': self.__acknowledge_public(initiator)}))
 
     def __acknowledge_public(self, user: User) -> str:
         """
@@ -118,7 +118,6 @@ class Pausebot():
         return 'Den er grei! God ' + pauseString + ' <3'
 
 SLACK_BOT_KEY = None
-SLACK_AUTH_KEY = None
 DEBUG_FLAG = None
 
 try:
@@ -126,12 +125,6 @@ try:
 except KeyError:
     print('WARNING: Bot API key not found')
     SLACK_BOT_KEY = ""
-
-try:
-    SLACK_AUTH_KEY = os.environ['AUTHKEY']
-except KeyError:
-    print('WARNING: Slack AUTH key not found')
-    SLACK_AUTH_KEY = ""
 
 try:
     DEBUG_FLAG = os.environ['PAUSEBOT_DEBUG']
