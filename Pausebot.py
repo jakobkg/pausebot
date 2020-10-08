@@ -1,5 +1,6 @@
 import os
 import pytz
+import requests
 from enum import IntEnum, unique
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
@@ -94,7 +95,7 @@ class Pausebot():
 
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
-        self.m_client.chat_postMessage(text=self.__acknowledge_public(initiator), channel=requestDict['channel_id'])
+        requests.post(url=PAUSE_CHANNEL_HOOK, json={'text': self.__acknowledge_public(initiator)})
 
         return self.__acknowledge_private(initiator)
 
@@ -117,8 +118,15 @@ class Pausebot():
 
         return 'Den er grei! God ' + pauseString + ' <3'
 
+PAUSE_CHANNEL_HOOK = None
 SLACK_BOT_KEY = None
 DEBUG_FLAG = None
+
+try:
+    PAUSE_CHANNEL_HOOK = os.environ['CHANNEL_HOOK_URL']
+except KeyError:
+    print('WARNING: Channel webhook not found')
+    PAUSE_CHANNEL_HOOK = ""
 
 try:
     SLACK_BOT_KEY = os.environ['BOTKEY']
