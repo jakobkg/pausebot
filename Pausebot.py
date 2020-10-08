@@ -49,6 +49,17 @@ class User():
 
         return self.m_PauseType
 
+    def getUserID(self) -> str:
+        """
+        Return the user ID if this Slack user
+        """
+        return self.m_UserID
+
+    def tagUser(self) -> str:
+        """
+        Insert this into a message to tag the user in the message on Slack
+        """
+        return '<@' + self.m_UserID + '>'
 
 class Pausebot():
     """
@@ -83,8 +94,6 @@ class Pausebot():
 
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
-        self.m_PauseQueue.append(initiator)
-
         return self.__acknowledge_pause(initiator)
 
     def __acknowledge_pause(self, user: User) -> str:
@@ -92,7 +101,7 @@ class Pausebot():
         Send a response to let the user know that their pause has been registered
         """
 
-        return 'Ok, du har pause til ' + user.getPauseEnd().strftime('%H:%M')
+        return 'Ok, ' + user.tagUser() + ' har pause til ' + user.getPauseEnd().strftime('%H:%M')
 
 
 def respond_pausequeue(pauselist):
