@@ -98,6 +98,8 @@ class Pausebot():
         requests.post(url=requestDict['response_url'], data={'text': self.__acknowledge_private(initiator), 'response_type': 'ephemeral'})
         requests.post(url=requestDict['response_url'], data={'text': self.__acknowledge_public(initiator)})
 
+        return 'Prosesserer...'
+
     def __acknowledge_public(self, user: User) -> str:
         """
         Send a response to let the user know that their pause has been registered
