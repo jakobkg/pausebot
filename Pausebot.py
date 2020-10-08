@@ -1,12 +1,10 @@
 import os
 import pytz
-import requests
 from enum import IntEnum, unique
 from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
 from slack import WebClient
 from slack.errors import SlackApiError
-from threading import Timer
 
 
 @unique
@@ -96,9 +94,7 @@ class Pausebot():
 
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
-        publicresponse = {'text': self.__acknowledge_public(initiator), 'response_type': 'in_channel'}
-
-        Timer(5, requests.post, kwargs={'url': requestDict['response_url'], 'data': publicresponse}).start()
+        self.m_client.chat_postMessage(self.__acknowledge_public(initiator), channel=requestDict['channel_id'])
 
         return self.__acknowledge_private(initiator)
 
