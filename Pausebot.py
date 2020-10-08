@@ -95,7 +95,7 @@ class Pausebot():
 
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
-        requests.post(url=requestDict['response_url'], data={'text': self.__acknowledge_public(initiator)})
+        requests.post(url=requestDict['response_url'], data={'text': self.__acknowledge_public(initiator), 'response_type': 'in_channel'})
 
         return self.__acknowledge_private(initiator)
 
