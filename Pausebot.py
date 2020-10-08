@@ -84,7 +84,7 @@ class Pausebot():
         and call the appropriate handling method
         """
 
-        validChannels = ['b2c_pt_pause', 'directmessage'] if DEBUG_FLAG else ['b2c_pt_pause']
+        validChannels = ['b2c_pt_pause', 'pausebot_testkanal'] if DEBUG_FLAG else ['b2c_pt_pause']
 
         if requestDict['channel_name'] not in validChannels:
             return 'Feil kanal! Jeg svarer bare i #b2c_pt_pause'
@@ -101,15 +101,10 @@ class Pausebot():
         Send a response to let the user know that their pause has been registered
         """
 
-        return 'Ok, ' + user.tagUser() + ' har pause til ' + user.getPauseEnd().strftime('%H:%M')
+        pauseString = 'pause' if user.getPauseType().name == 'Break' else 'lunsj'
+        pauseEndString = user.getPauseEnd().strftime('%H:%M')
 
-
-def respond_pausequeue(pauselist):
-    """
-    Respond to the queue command with the list of users waiting for their pause
-    """
-    pass
-
+        return 'Ok, ' + user.tagUser() + ' har ' + pauseString + ' til ' + pauseEndString
 
 SLACK_BOT_KEY = None
 SLACK_AUTH_KEY = None
