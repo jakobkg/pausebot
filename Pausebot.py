@@ -95,10 +95,9 @@ class Pausebot():
 
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
-        requests.post(url=requestDict['response_url'], data={'text': self.__acknowledge_private(initiator), 'response_type': 'ephemeral'})
         requests.post(url=requestDict['response_url'], data={'text': self.__acknowledge_public(initiator)})
 
-        return 'Prosesserer...'
+        return self.__acknowledge_private(initiator)
 
     def __acknowledge_public(self, user: User) -> str:
         """
