@@ -94,7 +94,7 @@ class Pausebot():
 
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
-        self.m_client.chat_postMessage(self.__acknowledge_public(initiator), channel=requestDict['channel_id'])
+        self.m_client.chat_postMessage(text=self.__acknowledge_public(initiator), channel=requestDict['channel_id'])
 
         return self.__acknowledge_private(initiator)
 
