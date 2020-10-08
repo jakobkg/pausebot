@@ -84,7 +84,7 @@ class Pausebot():
         and call the appropriate handling method
         """
 
-        validChannels = ['b2c_pt_pause', 'pausebot_testkanal'] if DEBUG_FLAG else ['b2c_pt_pause']
+        validChannels = ['b2c_pt_pause', 'pausebot_testkanal', 'privategroup'] if DEBUG_FLAG else ['b2c_pt_pause']
 
         if requestDict['channel_name'] not in validChannels:
             return 'Feil kanal! Jeg svarer bare i #b2c_pt_pause'
