@@ -1,1 +1,1 @@
-web: gunicorn Pausebot:flaskapp
+web: gunicorn Pausebot:flaskApp

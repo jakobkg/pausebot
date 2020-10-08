@@ -1,6 +1,8 @@
 import os
+import pytz
+import requests
 from enum import IntEnum, unique
-from datetime import datetime, time
+from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
 from slack import WebClient
 from slack.errors import SlackApiError
@@ -19,21 +21,53 @@ class User():
     """
     Class for storing users, should contain the following:
     User's display name [String]
+    User's Slack ID [String]
     Type of pause the user is taking [Pause]
-    When the user's pause is over [datetime object?]
+    When the user's pause is over [datetime object]
     """
 
     m_DisplayName: str
+    m_UserID: str
     m_PauseType: Pause
     m_PauseEnd: datetime
 
+    def __init__(self, id: str, pause: Pause, pauseEnd: datetime) -> None:
+        self.m_UserID = id
+        self.m_PauseType = pause
+        self.m_PauseEnd = pauseEnd
+
+    def getPauseEnd(self):
+        """
+        Returns the datetime object of the end of the user's pause [datetime object]
+        """
+
+        return self.m_PauseEnd
+
+    def getPauseType(self):
+        """
+        Returns the type of pause the user is taking [Pause]
+        """
+
+        return self.m_PauseType
+
+    def getUserID(self) -> str:
+        """
+        Return the user ID if this Slack user
+        """
+        return self.m_UserID
+
+    def tagUser(self) -> str:
+        """
+        Insert this into a message to tag the user in the message on Slack
+        """
+        return '<@' + self.m_UserID + '>'
 
 class Pausebot():
     """
     The bot! Should store:
     Pause queue [list of User]
     The Slack client? [WebClient]
-    Methods for input from Slack as outlined below
+    Methods for parsing and processing input from Slack
     Methods for responding to Slack
     Methods for managing the pause queue
     """
@@ -45,57 +79,60 @@ class Pausebot():
         self.m_client = client
         self.m_PauseQueue = []
 
-    def parse_command(self, request_data):
+    def parse_command(self, requestDict: dict) -> str:
         """
         Parse the Slack POST message of a triggered /slash command,
         and call the appropriate handling method
         """
-        return (True, 'dette er en tekst-respons')
 
+        validChannels = ['b2c_pt_pause', 'directmessage', 'privategroup'] if DEBUG_FLAG else ['b2c_pt_pause']
 
-def acknowledge_pause(user, pause):
-    """
-    Send a response to let the user know that their pause has been registered
-    """
-    pass
+        if requestDict['channel_name'] not in validChannels:
+            return 'Feil kanal! Jeg svarer bare i #b2c_pt_pause'
 
+        pause = Pause.Lunch if requestDict['command'] == '/lunsj' else Pause.Break
+        pauseEnd = datetime.now(pytz.timezone('Europe/Oslo')) + timedelta(minutes=pause)
 
-def add_to_queue(user, pause, pauselist):
-    """
-    Update the queue of users who are waitinbg for their pause
-    """
-    pass
+        initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
+        requests.post(url=PAUSE_CHANNEL_HOOK, json={'text': self.__acknowledge_public(initiator)})
 
-def remove_from_queue(user, pauselist):
-    """
-    Remove a user from the list once their pause has ended
-    """
-    pass
+        return self.__acknowledge_private(initiator)
 
+    def __acknowledge_public(self, user: User) -> str:
+        """
+        Send a response to let the user know that their pause has been registered
+        """
 
-def respond_pausequeue(pauselist):
-    """
-    Respond to the queue command with the list of users waiting for their pause
-    """
-    pass
+        pauseString = 'pause' if user.getPauseType().name == 'Break' else 'lunsj'
+        pauseEndString = user.getPauseEnd().strftime('%H:%M')
 
+        return user.tagUser() + ' har ' + pauseString + ' til ' + pauseEndString
 
+    def __acknowledge_private(self, user: User) -> str:
+        """
+        Send a response to let the user know that their pause has been registered
+        """
+
+        pauseString = 'pause' if user.getPauseType().name == 'Break' else 'lunsj'
+
+        return 'Den er grei! God ' + pauseString + ' <3'
+
+PAUSE_CHANNEL_HOOK = None
 SLACK_BOT_KEY = None
-SLACK_AUTH_KEY = None
 DEBUG_FLAG = None
+
+try:
+    PAUSE_CHANNEL_HOOK = os.environ['CHANNEL_HOOK_URL']
+except KeyError:
+    print('WARNING: Channel webhook not found')
+    PAUSE_CHANNEL_HOOK = ""
 
 try:
     SLACK_BOT_KEY = os.environ['BOTKEY']
 except KeyError:
     print('WARNING: Bot API key not found')
     SLACK_BOT_KEY = ""
-
-try:
-    SLACK_AUTH_KEY = os.environ['AUTHKEY']
-except KeyError:
-    print('WARNING: Slack AUTH key not found')
-    SLACK_AUTH_KEY = ""
 
 try:
     DEBUG_FLAG = os.environ['PAUSEBOT_DEBUG']
@@ -105,17 +142,21 @@ except KeyError:
 
 bot = Pausebot(WebClient(token=SLACK_BOT_KEY))
 
-flaskapp = Flask(__name__)
+flaskApp = Flask(__name__)
 
 
-@flaskapp.route('/', methods=['POST'])
+@flaskApp.route('/', methods=['POST'])
 def pass_to_bot():
+    slashcommandDict = request.form
     if DEBUG_FLAG:
-        print(request.args)
+        print('==== SLACK POST REQUEST RECEIVED ===')
+        print('Contents:')
+        for item in slashcommandDict.items():
+            print(item)
 
-    botresponse = bot.parse_command(request.args)
-    return jsonify(ok=botresponse[0], text=botresponse[1])
+    botResponse = bot.parse_command(slashcommandDict)
+    return jsonify(ok=True, text=botResponse)
 
 
 if __name__ == '__main__':
-    flaskapp.run()
+    flaskApp.run()
