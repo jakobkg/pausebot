@@ -94,11 +94,11 @@ class Pausebot():
 
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
-        self.m_client.chat_postMessage(channel=requestDict['channel_id'], text=self.__acknowledge_pause(initiator))
+        self.m_client.chat_postMessage(channel=requestDict['channel_id'], text=self.__acknowledge_public(initiator))
 
-        return self.__acknowledge_pause(initiator)
+        return self.__acknowledge_private(initiator)
 
-    def __acknowledge_pause(self, user: User) -> str:
+    def __acknowledge_public(self, user: User) -> str:
         """
         Send a response to let the user know that their pause has been registered
         """
@@ -106,7 +106,16 @@ class Pausebot():
         pauseString = 'pause' if user.getPauseType().name == 'Break' else 'lunsj'
         pauseEndString = user.getPauseEnd().strftime('%H:%M')
 
-        return 'Ok, ' + user.tagUser() + ' har ' + pauseString + ' til ' + pauseEndString
+        return user.tagUser() + ' har ' + pauseString + ' til ' + pauseEndString
+
+    def __acknowledge_private(self, user: User) -> str:
+        """
+        Send a response to let the user know that their pause has been registered
+        """
+
+        pauseString = 'pause' if user.getPauseType().name == 'Break' else 'lunsj'
+
+        return 'Den er grei! God ' + pauseString + ' <3'
 
 SLACK_BOT_KEY = None
 SLACK_AUTH_KEY = None
