@@ -6,6 +6,7 @@ from datetime import datetime, timedelta
 from flask import Flask, jsonify, request
 from slack import WebClient
 from slack.errors import SlackApiError
+from threading import Thread
 
 
 @unique
@@ -95,7 +96,9 @@ class Pausebot():
 
         initiator = User(id=requestDict['user_id'], pause=pause, pauseEnd=pauseEnd)
 
-        requests.post(url=requestDict['response_url'], data={'text': self.__acknowledge_public(initiator), 'response_type': 'in_channel'})
+        publicresponse = {'text': self.__acknowledge_public(initiator), 'response_type': 'in_channel'}
+
+        Thread(target=requests.post, kwargs={'url': requestDict['response_url'], 'data': publicresponse}).start()
 
         return self.__acknowledge_private(initiator)
 
