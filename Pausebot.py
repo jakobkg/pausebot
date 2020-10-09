@@ -36,14 +36,14 @@ class User():
         self.m_PauseType = pause
         self.m_PauseEnd = pauseEnd
 
-    def getPauseEnd(self):
+    def getPauseEnd(self) -> datetime:
         """
         Returns the datetime object of the end of the user's pause [datetime object]
         """
 
         return self.m_PauseEnd
 
-    def getPauseType(self):
+    def getPauseType(self) -> Pause:
         """
         Returns the type of pause the user is taking [Pause]
         """
@@ -52,7 +52,7 @@ class User():
 
     def getUserID(self) -> str:
         """
-        Return the user ID if this Slack user
+        Return the user ID of this Slack user
         """
         return self.m_UserID
 
@@ -73,16 +73,16 @@ class Pausebot():
     """
 
     m_PauseQueue: User
-    m_client: WebClient
+    m_Client: WebClient
 
     def __init__(self, client: WebClient) -> None:
-        self.m_client = client
+        self.m_Client = client
         self.m_PauseQueue = []
 
     def parse_command(self, requestDict: dict) -> str:
         """
         Parse the Slack POST message of a triggered /slash command,
-        and call the appropriate handling method
+        and [TODO] call the appropriate handling method
         """
 
         validChannels = ['b2c_pt_pause', 'directmessage', 'privategroup'] if DEBUG_FLAG else ['b2c_pt_pause']
